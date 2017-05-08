@@ -11,6 +11,9 @@ import com.activeandroid.annotation.Table;
 @Table(name = "Todos")
 public class Todos extends Model {
 
+    /*@Column(name = "id")
+    public int id;*/
+
     @Column(name = "userId")
     public int userId;
 
@@ -25,6 +28,12 @@ public class Todos extends Model {
         super();
     }
 
+    /*public Todos (int id, int userId, String title, boolean completed){
+        this.id = id;
+        this.userId = userId;
+        this.title = title;
+        this.completed = completed;
+    }*/
     public Todos (int userId, String title, boolean completed){
         this.userId = userId;
         this.title = title;

@@ -11,6 +11,10 @@ import com.activeandroid.annotation.Table;
 @Table(name = "Photos")
 public class Photos extends Model{
 
+
+    /*@Column(name = "id")
+    public int id;*/
+
     @Column(name = "albumnId")
     public int albumnId;
 
@@ -29,7 +33,15 @@ public class Photos extends Model{
         super();
     }
 
+    /*public Photos (int id, int albumnId, String title, String url, String thumbnailUrl){
+        this.id = id;
+        this.albumnId = albumnId;
+        this.thumbnailUrl = thumbnailUrl;
+        this.title = title;
+        this.url = url;
+    }*/
     public Photos (int albumnId, String title, String url, String thumbnailUrl){
+     //   this.id = id;
         this.albumnId = albumnId;
         this.thumbnailUrl = thumbnailUrl;
         this.title = title;

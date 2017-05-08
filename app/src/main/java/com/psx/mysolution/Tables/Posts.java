@@ -10,6 +10,9 @@ import com.activeandroid.annotation.Table;
 @Table(name = "Posts")
 public class Posts extends Model {
 
+    /*@Column(name = "id")
+    public int id;*/
+
     @Column (name = "userId")
     public int userId;
 
@@ -24,6 +27,12 @@ public class Posts extends Model {
         super();
     }
 
+    /*public Posts (int id, int userId, String title, String body){
+        this.id = id;
+        this.userId = userId;
+        this.body = body;
+        this.title = title;
+    }*/
     public Posts (int userId, String title, String body){
         this.userId = userId;
         this.body = body;

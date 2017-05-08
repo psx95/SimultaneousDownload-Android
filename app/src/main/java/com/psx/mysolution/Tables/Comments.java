@@ -9,6 +9,10 @@ import com.activeandroid.annotation.Table;
  */
 @Table(name="Comments")
 public class Comments extends Model {
+
+    //@Column(name = "id")
+    //public int id;
+
     @Column(name = "postId")
     public int postId;
 
@@ -26,11 +30,23 @@ public class Comments extends Model {
         super();
     }
 
+    /*public Comments (int id,int postId, String name, String email, String body) {
+        super();
+        this.id = id;
+        this.postId = postId;
+        this.name = name;
+        this.body = body;
+        this.email = email;
+    }*/
+
     public Comments (int postId, String name, String email, String body) {
         super();
+        //this.id = id;
         this.postId = postId;
         this.name = name;
         this.body = body;
         this.email = email;
     }
+
+
 }
