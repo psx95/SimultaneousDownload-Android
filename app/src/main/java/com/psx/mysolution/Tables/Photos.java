@@ -1,4 +1,4 @@
-package com.psx.mysolution.Tables;
+    package com.psx.mysolution.Tables;
 
 import com.activeandroid.Model;
 import com.activeandroid.annotation.Column;
