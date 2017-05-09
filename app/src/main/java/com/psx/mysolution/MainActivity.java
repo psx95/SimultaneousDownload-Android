@@ -286,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 else {
                     Log.d("SAVING PHOTOS","PHOTOS WERE NULL");
                 }
-                Toast.makeText(context,"PHOTOS DOWNLOADED",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context,"PHOTOS DOWNLOADED",Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -317,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 else {
                     Log.d("SAVING TODOS","TODOS WERE NULL");
                 }
-                Toast.makeText(context,"TODOS DOWNLOADED",Toast.LENGTH_SHORT).show();
+               // Toast.makeText(context,"TODOS DOWNLOADED",Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -347,7 +347,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 else {
                     Log.d("SAVING POSTS","POSTS WERE NULL");
                 }
-                Toast.makeText(context,"POSTS DOWNLOADED",Toast.LENGTH_SHORT).show();
+               // Toast.makeText(context,"POSTS DOWNLOADED",Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -360,7 +360,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (jsonArray != null){
                     Log.d("OBSERVER",jsonArray.length()+" TODOS");
                     jsonArrayPosts = jsonArray;
-                    Toast.makeText(context,"json not null",Toast.LENGTH_SHORT).show();
+                   // Toast.makeText(context,"json not null",Toast.LENGTH_SHORT).show();
                 }
             }
         };
