@@ -1,6 +1,7 @@
 package com.psx.mysolution;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -47,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public JSONArray jsonArrayComments, jsonArrayPhotos, jsonArrayTodos, jsonArrayPosts;
     public Button button_url_comments, button_url_photos, button_url_todos, button_url_posts, button_currentTimestamp;
     public Observable<JSONArray> fetchComments, fetchPhotos, fetchTodos, fetchPosts;
-    public Observable<OnClickEvent> observableClick;
     public Observable<JSONObject> zipped;
 
     @Override
@@ -84,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         button_url_photos.setOnClickListener(this);
         button_url_todos.setOnClickListener(this);
         button_url_posts.setOnClickListener(this);
-
 
         // Observable for comments
         fetchComments = Observable.create(new Observable.OnSubscribe<JSONArray>() {
@@ -252,24 +251,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 endTimeForUrl_comments.setText("End: "+getTime());
                 //Toast.makeText(context,"COMMENTS DOWNLOADED",Toast.LENGTH_SHORT).show();
                 if (jsonArrayComments != null){
-                    Log.d("SAVING COMMENTS","COMMENTS WERE NOT NULL");
-                    ActiveAndroid.beginTransaction();
-                    startSaveForUrl_comments.setText("Start Save: "+getTime());
-                    JSONObject comment;
-                    try{
-                        for (int i = 0; i<jsonArrayComments.length();i++){
-                            comment = (JSONObject) jsonArrayComments.get(i);
-                            Comments comments = new Comments(comment.getInt("postId"),comment.getString("name"),comment.getString("email"),comment.getString("body"));
-                            comments.save();
-                        }
-                        ActiveAndroid.setTransactionSuccessful();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    finally {
-                        ActiveAndroid.endTransaction();
-                        endSaveForUrl_comments.setText("End Save: "+getTime());
-                    }
+                    // data base operation are making the frames skip. --> need to do database operations in a seperate thread
+                    new PerformDBOperations().execute(jsonArrayComments);
                 }
                 else {
                     Log.d("SAVING COMMENTS","COMMENTS WERE NULL");
@@ -298,25 +281,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d("OBSERVER PHOTOS","COMPLETED");
                 endTimeForUrl_photos.setText("End: "+getTime());
                 if (jsonArrayPhotos != null){
-                   /* Log.d("SAVING PHOTOS","PHOTOS WERE NOT NULL");
-                    ActiveAndroid.beginTransaction();
-                    try{
-                        startSaveForUrl_photos.setText("Start Save: "+getTime());
-                        JSONObject photo;
-                        for (int i = 0; i< jsonArrayPhotos.length();i++){
-                            photo = (JSONObject) jsonArrayPhotos.get(i);
-                            Photos photos = new Photos(photo.getInt("albumId"),photo.getString("title"),photo.getString("url"),photo.getString("thumbnailUrl"));
-                            photos.save();
-                        }
-                        ActiveAndroid.setTransactionSuccessful();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    finally {
-                        ActiveAndroid.endTransaction();
-                        endSaveForUrl_photos.setText("End Save: "+getTime());
-                    }
-*/                }
+                   new PerformDBOperations().execute(jsonArrayPhotos);
+                }
                 else {
                     Log.d("SAVING PHOTOS","PHOTOS WERE NULL");
                 }
@@ -346,26 +312,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 endTimeForUrl_todos.setText("End: "+getTime());
                 if (jsonArrayTodos != null){
                     // start saving in the database
-                   /* Log.d("SAVING TODOS","TODOS WERE NOT NULL");
-                    try{
-                        ActiveAndroid.beginTransaction();
-                        startSaveForUrl_todos.setText("Start Save: "+getTime());
-                        JSONObject todo;
-                        for (int i = 0;i <jsonArrayTodos.length();i++){
-                            todo = (JSONObject) jsonArrayTodos.get(i);
-                            Todos todos = new Todos(todo.getInt("userId"),todo.getString("title"),todo.getString("completed").equals("true")?true:false);
-                            todos.save();
-                        }
-                        ActiveAndroid.setTransactionSuccessful();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    finally {
-                        ActiveAndroid.endTransaction();
-                        endSaveForUrl_todos.setText("End Save: "+getTime());
-                        Todos todos = new Select().from(Todos.class).where("userId = ?",10).executeSingle();
-                        Log.d("Database Check",todos.toString());
-                    }*/
+                    new PerformDBOperations().execute(jsonArrayTodos);
                 }
                 else {
                     Log.d("SAVING TODOS","TODOS WERE NULL");
@@ -395,24 +342,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d("OBSERVER POSTS","COMPLETED");
                 endTimeForUrl_posts.setText("End: "+getTime());
                 if (jsonArrayPosts != null){
-                   /* Log.d("SAVING POSTS","POSTS WERE NOT NULL");
-                    try{
-                        ActiveAndroid.beginTransaction();
-                        startSaveForUrl_posts.setText("Start Save: "+getTime());
-                        JSONObject post;
-                        for (int i = 0 ;i< jsonArrayPosts.length();i++){
-                            post = (JSONObject) jsonArrayPosts.get(i);
-                            Posts posts = new Posts(post.getInt("userId"),post.getString("title"),post.getString("body"));
-                            posts.save();
-                        }
-                        ActiveAndroid.setTransactionSuccessful();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    finally {
-                        ActiveAndroid.endTransaction();
-                        endSaveForUrl_posts.setText("End Save: "+getTime());
-                    }*/
+                    new PerformDBOperations().execute(jsonArrayPosts);
                 }
                 else {
                     Log.d("SAVING POSTS","POSTS WERE NULL");
@@ -468,61 +398,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int id = view.getId();
         switch (id){
             case R.id.button_url_comments:
-
-                // this will start the data download from the url- comments
-                /*fetchComments.subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<JSONArray>() {
-                            @Override
-                            public void call(JSONArray jsonArray) {
-                                if (jsonArray!=null) {
-                                  //  startSaveForUrl_comments.append(getTime());
-                                    Log.d("CHECKING RX", jsonArray.length() + " COMMENTS");
-                                   // endSaveForUrl_comments.append(getTime());
-                                }
-                                else{
-                                    Log.d("CHECKING","null");
-                                }
-                            }
-                        });*/
                 subscribeTocomments();
                  break;
             case R.id.button_url_photos:
-
-                // subscribe it - this will begin downloading the data
-                /*fetchPhotos.subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<JSONArray>() {
-                            @Override
-                            public void call(JSONArray jsonArray) {
-                                // this function will be called whenever the observable emits any data
-                                if (jsonArray != null){
-                                    Log.d("CHECKING RX",jsonArray.length()+" PHOTOS");
-                                }
-                                else {
-                                    Log.d("CHECKING RX", "PHOTOS were empty");
-                                }
-                            }
-                        });*/
                 subscribToPhotos();
                 break;
             case R.id.button_url_todos:
-
-                // subscribe the above observable
-                /*fetchTodos.subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<JSONArray>() {
-                            @Override
-                            public void call(JSONArray jsonArray) {
-                                // this action will be performed whever the observer emits the data
-                                if (jsonArray != null) {
-                                    Log.d("CHECKING RX", jsonArray.length() + " TODOS");
-                                }
-                                else {
-                                    Log.d("CHECKING RX","json array for todos was null");
-                                }
-                            }
-                        });*/
                 subscribeToTodos();
                 break;
             case R.id.button_url_posts:
@@ -547,6 +428,125 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.button_current_timestamp:
                 Toast.makeText(context,"Current Timestamp is "+getTime(),Toast.LENGTH_LONG).show();
                 break;
+        }
+    }
+
+    class PerformDBOperations extends AsyncTask<JSONArray, Void, Void>{
+
+        JSONArray jsonArray;
+        String startTime;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            startTime = getTime();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (jsonArray.equals(jsonArrayComments)){
+                endSaveForUrl_comments.setText("End Save: "+getTime());
+                startSaveForUrl_comments.setText("Start Save: "+startTime);
+            }
+            else if (jsonArray.equals(jsonArrayPhotos)){
+                endSaveForUrl_photos.setText("End Save: "+getTime());
+                startSaveForUrl_photos.setText("Start Save: "+startTime);
+            }
+            else if (jsonArray.equals(jsonArrayTodos)){
+                endSaveForUrl_todos.setText("End Save: "+getTime());
+                startSaveForUrl_todos.setText("Start Save: "+startTime);
+            }
+            else if (jsonArray.equals(jsonArrayPosts)){
+                endSaveForUrl_posts.setText("End Save: "+getTime());
+                startSaveForUrl_posts.setText("Start Save: "+startTime);
+            }
+
+        }
+
+        @Override
+        protected Void doInBackground(JSONArray... jsonArrays) {
+            jsonArray = jsonArrays[0];
+            if (jsonArray.equals(jsonArrayComments)) {
+                Log.d("SAVING COMMENTS", "COMMENTS WERE NOT NULL");
+                ActiveAndroid.beginTransaction();
+                //startSaveForUrl_comments.setText("Start Save: "+getTime());
+                JSONObject comment;
+                try {
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        comment = (JSONObject) jsonArray.get(i);
+                        Comments comments = new Comments(comment.getInt("postId"), comment.getString("name"), comment.getString("email"), comment.getString("body"));
+                        comments.save();
+                    }
+                    ActiveAndroid.setTransactionSuccessful();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } finally {
+                    ActiveAndroid.endTransaction();
+                    //  endSaveForUrl_comments.setText("End Save: "+getTime());
+                    Comments todos = new Select().from(Comments.class).where("postId = ?",10).executeSingle();
+                    Log.d("Database Check",todos.body+" "+todos.name+" "+todos.email+" "+todos.postId);
+                }
+            }
+            else if (jsonArray.equals(jsonArrayPhotos)){
+                    Log.d("SAVING PHOTOS","PHOTOS WERE NOT NULL");
+                    ActiveAndroid.beginTransaction();
+                    try{
+                      //  startSaveForUrl_photos.setText("Start Save: "+getTime());
+                        JSONObject photo;
+                        for (int i = 0; i< jsonArrayPhotos.length();i++){
+                            photo = (JSONObject) jsonArrayPhotos.get(i);
+                            Photos photos = new Photos(photo.getInt("albumId"),photo.getString("title"),photo.getString("url"),photo.getString("thumbnailUrl"));
+                            photos.save();
+                        }
+                        ActiveAndroid.setTransactionSuccessful();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    finally {
+                        ActiveAndroid.endTransaction();
+                        //endSaveForUrl_photos.setText("End Save: "+getTime());
+                    }
+            }
+            else if (jsonArray.equals(jsonArrayTodos)){
+                   Log.d("SAVING TODOS","TODOS WERE NOT NULL");
+                    try{
+                        ActiveAndroid.beginTransaction();
+                        JSONObject todo;
+                        for (int i = 0;i <jsonArrayTodos.length();i++){
+                            todo = (JSONObject) jsonArrayTodos.get(i);
+                            Todos todos = new Todos(todo.getInt("userId"),todo.getString("title"),todo.getString("completed").equals("true")?true:false);
+                            todos.save();
+                        }
+                        ActiveAndroid.setTransactionSuccessful();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    finally {
+                        ActiveAndroid.endTransaction();
+                        Todos todos = new Select().from(Todos.class).where("userId = ?",10).executeSingle();
+                        Log.d("Database Check",todos.toString());
+                    }
+            }
+            else if (jsonArray.equals(jsonArrayPosts)){
+                   Log.d("SAVING POSTS","POSTS WERE NOT NULL");
+                    try{
+                        ActiveAndroid.beginTransaction();
+                        JSONObject post;
+                        for (int i = 0 ;i< jsonArrayPosts.length();i++){
+                            post = (JSONObject) jsonArrayPosts.get(i);
+                            Posts posts = new Posts(post.getInt("userId"),post.getString("title"),post.getString("body"));
+                            posts.save();
+                        }
+                        ActiveAndroid.setTransactionSuccessful();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    finally {
+                        ActiveAndroid.endTransaction();
+                    }
+            }
+            return null;
         }
     }
 }
