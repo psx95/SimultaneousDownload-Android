@@ -10,6 +10,9 @@ import com.android.volley.toolbox.Volley;
  * Created by Pranav on 07-05-2017.
  */
 
+/* This class is No longer used by the Application, The class was created to handle the RequestQueue in Volley
+ * But The Application no longer uses Volley for Network calls 
+ */
 public class ApplicationController extends com.activeandroid.app.Application {
 
     // Contains Variables accessible throught the application
