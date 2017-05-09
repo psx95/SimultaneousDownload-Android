@@ -10,6 +10,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.activeandroid.ActiveAndroid;
+import com.activeandroid.query.Select;
+import com.psx.mysolution.Tables.Comments;
+import com.psx.mysolution.Tables.Photos;
+import com.psx.mysolution.Tables.Posts;
+import com.psx.mysolution.Tables.Todos;
 import com.squareup.okhttp.OkHttpClient;
 
 import org.json.JSONArray;
@@ -78,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         button_url_photos.setOnClickListener(this);
         button_url_todos.setOnClickListener(this);
         button_url_posts.setOnClickListener(this);
-        //observableClick = ViewObservable.clicks(button_url_comments);
+
 
         // Observable for comments
         fetchComments = Observable.create(new Observable.OnSubscribe<JSONArray>() {
@@ -198,28 +204,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void run() {
                 //ping all the 4 urls directly
                 Log.d("CHECK","here");
-               /* zipped.subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(getObserver());*/
-               startTimeForUrl_comments.append(getTime());
-               fetchPhotos.subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(getObserverForPhotos());
-                startTimeForUrl_photos.append(getTime());
-               fetchComments.subscribeOn(Schedulers.newThread())
-                       .observeOn(AndroidSchedulers.mainThread())
-                       .subscribe(getObserverForComments());
-                startTimeForUrl_todos.append(getTime());
-                fetchTodos.subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(getObserverForTodos());
-                startTimeForUrl_posts.append(getTime());
-                fetchPosts.subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(getObserverForPosts());
+               // pinging all the urls at the same time to begin the download in seperate threads
+               subscribeTocomments();
+               subscribToPhotos();
+               subscribeToTodos();
+               subscribeToPosts();
             }
         },5000);
 
+    }
+
+    public void subscribeTocomments (){
+        //startTimeForUrl_comments.append(getTime());
+        startTimeForUrl_comments.setText("Start: "+getTime());
+        fetchComments.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(getObserverForComments());
+    }
+
+    public void subscribToPhotos (){
+        fetchPhotos.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(getObserverForPhotos());
+        startTimeForUrl_photos.setText("Start: "+getTime());
+    }
+
+    public void subscribeToTodos (){
+        startTimeForUrl_todos.setText("Start: "+getTime());
+        fetchTodos.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(getObserverForTodos());
+    }
+
+    public void subscribeToPosts (){
+        startTimeForUrl_posts.setText("Start: "+getTime());
+        fetchPosts.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(getObserverForPosts());
     }
 
     // make separate Observers for the observables
@@ -228,8 +249,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onCompleted() {
                 Log.d("OBSERVER COMMENTS","COMPLETED");
-                endTimeForUrl_comments.append(getTime());
-                Toast.makeText(context,"COMMENTS DOWNLOADED",Toast.LENGTH_SHORT).show();
+                endTimeForUrl_comments.setText("End: "+getTime());
+                //Toast.makeText(context,"COMMENTS DOWNLOADED",Toast.LENGTH_SHORT).show();
+                if (jsonArrayComments != null){
+                    Log.d("SAVING COMMENTS","COMMENTS WERE NOT NULL");
+                    ActiveAndroid.beginTransaction();
+                    startSaveForUrl_comments.setText("Start Save: "+getTime());
+                    JSONObject comment;
+                    try{
+                        for (int i = 0; i<jsonArrayComments.length();i++){
+                            comment = (JSONObject) jsonArrayComments.get(i);
+                            Comments comments = new Comments(comment.getInt("postId"),comment.getString("name"),comment.getString("email"),comment.getString("body"));
+                            comments.save();
+                        }
+                        ActiveAndroid.setTransactionSuccessful();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    finally {
+                        ActiveAndroid.endTransaction();
+                        endSaveForUrl_comments.setText("End Save: "+getTime());
+                    }
+                }
+                else {
+                    Log.d("SAVING COMMENTS","COMMENTS WERE NULL");
+                }
             }
 
             @Override
@@ -240,6 +284,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onNext(JSONArray jsonArray) {
                 if (jsonArray != null){
+                    jsonArrayComments = jsonArray;
                     Log.d("OBSERVER",jsonArray.length()+" COMMENTS");
                 }
             }
@@ -251,7 +296,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onCompleted() {
                 Log.d("OBSERVER PHOTOS","COMPLETED");
-                endTimeForUrl_photos.append(getTime());
+                endTimeForUrl_photos.setText("End: "+getTime());
+                if (jsonArrayPhotos != null){
+                   /* Log.d("SAVING PHOTOS","PHOTOS WERE NOT NULL");
+                    ActiveAndroid.beginTransaction();
+                    try{
+                        startSaveForUrl_photos.setText("Start Save: "+getTime());
+                        JSONObject photo;
+                        for (int i = 0; i< jsonArrayPhotos.length();i++){
+                            photo = (JSONObject) jsonArrayPhotos.get(i);
+                            Photos photos = new Photos(photo.getInt("albumId"),photo.getString("title"),photo.getString("url"),photo.getString("thumbnailUrl"));
+                            photos.save();
+                        }
+                        ActiveAndroid.setTransactionSuccessful();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    finally {
+                        ActiveAndroid.endTransaction();
+                        endSaveForUrl_photos.setText("End Save: "+getTime());
+                    }
+*/                }
+                else {
+                    Log.d("SAVING PHOTOS","PHOTOS WERE NULL");
+                }
                 Toast.makeText(context,"PHOTOS DOWNLOADED",Toast.LENGTH_SHORT).show();
             }
 
@@ -263,6 +331,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onNext(JSONArray jsonArray) {
                 if (jsonArray != null){
+                    jsonArrayPhotos = jsonArray;
                     Log.d("OBSERVER",jsonArray.length()+" PHOTOS");
                 }
             }
@@ -274,7 +343,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onCompleted() {
                 Log.d("OBSERVER TODOS","COMPLETED");
-                endTimeForUrl_todos.append(getTime());
+                endTimeForUrl_todos.setText("End: "+getTime());
+                if (jsonArrayTodos != null){
+                    // start saving in the database
+                   /* Log.d("SAVING TODOS","TODOS WERE NOT NULL");
+                    try{
+                        ActiveAndroid.beginTransaction();
+                        startSaveForUrl_todos.setText("Start Save: "+getTime());
+                        JSONObject todo;
+                        for (int i = 0;i <jsonArrayTodos.length();i++){
+                            todo = (JSONObject) jsonArrayTodos.get(i);
+                            Todos todos = new Todos(todo.getInt("userId"),todo.getString("title"),todo.getString("completed").equals("true")?true:false);
+                            todos.save();
+                        }
+                        ActiveAndroid.setTransactionSuccessful();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    finally {
+                        ActiveAndroid.endTransaction();
+                        endSaveForUrl_todos.setText("End Save: "+getTime());
+                        Todos todos = new Select().from(Todos.class).where("userId = ?",10).executeSingle();
+                        Log.d("Database Check",todos.toString());
+                    }*/
+                }
+                else {
+                    Log.d("SAVING TODOS","TODOS WERE NULL");
+                }
                 Toast.makeText(context,"TODOS DOWNLOADED",Toast.LENGTH_SHORT).show();
             }
 
@@ -286,6 +381,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onNext(JSONArray jsonArray) {
                 if (jsonArray != null){
+                    jsonArrayTodos = jsonArray;
                     Log.d("OBSERVER",jsonArray.length()+" TODOS");
                 }
             }
@@ -297,7 +393,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onCompleted() {
                 Log.d("OBSERVER POSTS","COMPLETED");
-                endTimeForUrl_posts.append(getTime());
+                endTimeForUrl_posts.setText("End: "+getTime());
+                if (jsonArrayPosts != null){
+                   /* Log.d("SAVING POSTS","POSTS WERE NOT NULL");
+                    try{
+                        ActiveAndroid.beginTransaction();
+                        startSaveForUrl_posts.setText("Start Save: "+getTime());
+                        JSONObject post;
+                        for (int i = 0 ;i< jsonArrayPosts.length();i++){
+                            post = (JSONObject) jsonArrayPosts.get(i);
+                            Posts posts = new Posts(post.getInt("userId"),post.getString("title"),post.getString("body"));
+                            posts.save();
+                        }
+                        ActiveAndroid.setTransactionSuccessful();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    finally {
+                        ActiveAndroid.endTransaction();
+                        endSaveForUrl_posts.setText("End Save: "+getTime());
+                    }*/
+                }
+                else {
+                    Log.d("SAVING POSTS","POSTS WERE NULL");
+                }
                 Toast.makeText(context,"POSTS DOWNLOADED",Toast.LENGTH_SHORT).show();
             }
 
@@ -310,51 +429,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onNext(JSONArray jsonArray) {
                 if (jsonArray != null){
                     Log.d("OBSERVER",jsonArray.length()+" TODOS");
-                    startSaveForUrl_todos.append(getTime());
+                    jsonArrayPosts = jsonArray;
                     Toast.makeText(context,"json not null",Toast.LENGTH_SHORT).show();
                 }
             }
         };
     }
 
-    /*private Observer<JSONObject> getObserver (){
-        return new Observer<JSONObject>() {
-            @Override
-            public void onCompleted() {
-                // observer(zipped) has finished emitting data
-                //endSaveForUrl_comments.append(getTime());
-                //endSaveForUrl_posts.append(getTime());
-                Toast.makeText(context,"CHECKED",Toast.LENGTH_SHORT).show();
-                Log.d("OBSERVER"," "+"completed");
-            }
 
-            @Override
-            public void onError(Throwable e) {
-                Log.d("OBSERVER",e.getMessage()+"");
-                //Toast.makeText(context,e.getMessage(),Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onNext(JSONObject jsonObject) {
-                //called each time the observer emits the data
-                try {
-                    Log.d("OBSERVER",jsonObject.getJSONArray("posts").length()+" "+jsonObject.getJSONArray("comments").length());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        };
-    }*/
-
-
-
+    // function to return the current timestamp in String format
     public String getTime(){
         Long currentStartTimestamp = System.currentTimeMillis()/1000;
         String ts = currentStartTimestamp.toString();
         return ts;
     }
 
+
+    // A blocking function that will fetch data from the given URL using OkHTTP, (Synchronous call)
+    // Volley is more suited for Asynchronous call
     public JSONArray fetcchDataOkHttp (String url){
         try{
             OkHttpClient client = new OkHttpClient();
@@ -369,6 +461,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return null;
     }
 
+
+    // handle the clicks on individual buttons
     @Override
     public void onClick(View view) {
         int id = view.getId();
@@ -376,7 +470,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.button_url_comments:
 
                 // this will start the data download from the url- comments
-                fetchComments.subscribeOn(Schedulers.newThread())
+                /*fetchComments.subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Action1<JSONArray>() {
                             @Override
@@ -390,12 +484,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     Log.d("CHECKING","null");
                                 }
                             }
-                        });
+                        });*/
+                subscribeTocomments();
                  break;
             case R.id.button_url_photos:
 
                 // subscribe it - this will begin downloading the data
-                fetchPhotos.subscribeOn(Schedulers.newThread())
+                /*fetchPhotos.subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Action1<JSONArray>() {
                             @Override
@@ -408,12 +503,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     Log.d("CHECKING RX", "PHOTOS were empty");
                                 }
                             }
-                        });
+                        });*/
+                subscribToPhotos();
                 break;
             case R.id.button_url_todos:
 
                 // subscribe the above observable
-                fetchTodos.subscribeOn(Schedulers.newThread())
+                /*fetchTodos.subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Action1<JSONArray>() {
                             @Override
@@ -426,12 +522,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     Log.d("CHECKING RX","json array for todos was null");
                                 }
                             }
-                        });
+                        });*/
+                subscribeToTodos();
                 break;
             case R.id.button_url_posts:
 
                 // attach a observer and subscribe it -  this will begin downloading the data
-                fetchPosts.subscribeOn(Schedulers.newThread())
+                /*fetchPosts.subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Action1<JSONArray>() {
                             @Override
@@ -444,7 +541,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     Log.d("CHECKING RX", "json array was null");
                                 }
                             }
-                        });
+                        });*/
+                subscribeToPosts();
                 break;
             case R.id.button_current_timestamp:
                 Toast.makeText(context,"Current Timestamp is "+getTime(),Toast.LENGTH_LONG).show();
