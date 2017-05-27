@@ -104,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         /*observableClick.observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<OnClickEvent>() {
             @Override
+            @Override
             public void call(OnClickEvent onClickEvent) {
                 // this will start the data download from the url- comments
                 fetchComments.subscribeOn(Schedulers.newThread())
@@ -194,10 +195,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        // wait for 5 seconds
-        /*
-        * Code to make Android wait for 5 seconds
-        * */
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
