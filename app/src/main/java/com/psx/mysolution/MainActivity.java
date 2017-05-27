@@ -17,7 +17,7 @@ import com.psx.mysolution.Tables.Comments;
 import com.psx.mysolution.Tables.Photos;
 import com.psx.mysolution.Tables.Posts;
 import com.psx.mysolution.Tables.Todos;
-import com.psx.mysolution.helper.ObserverFactory;
+import com.psx.mysolution.helper.ObserverableFactory;
 import com.squareup.okhttp.OkHttpClient;
 
 import org.json.JSONArray;
@@ -28,7 +28,6 @@ import java.io.IOException;
 
 import rx.Observable;
 import rx.Observer;
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -82,92 +81,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         button_url_posts.setOnClickListener(this);
 
         // Observable for comments
-        /*fetchComments = Observable.create(new Observable.OnSubscribe<JSONArray>() {
-            @Override
-            public void call(Subscriber<? super JSONArray> subscriber) {
-                try {
-                  //  startTimeForUrl_comments.append(getTime());
-                    JSONArray data = fetcchDataOkHttp(urls[0]);
-                    subscriber.onNext(data);
-                   // endTimeForUrl_comments.append(getTime());
-                    subscriber.onCompleted();
-                }
-                catch (Exception e){
-                    subscriber.onError(e);
-                }
-            }
-        });*/
+        ObserverableFactory<JSONArray> observervableFactory = new ObserverableFactory<>(JSONArray.class);
+        fetchComments = observervableFactory.getObservervable(JSONArray.class,0);
 
-        ObserverFactory<JSONArray> observerFactory = new ObserverFactory<JSONArray>(JSONArray.class);
-        fetchComments = observerFactory.getObserver(JSONArray.class,0);
-
-        /*observableClick.observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<OnClickEvent>() {
-            @Override
-            @Override
-            public void call(OnClickEvent onClickEvent) {
-                // this will start the data download from the url- comments
-                fetchComments.subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<JSONArray>() {
-                            @Override
-                            public void call(JSONArray jsonArray) {
-                                if (jsonArray!=null) {
-                                    startSaveForUrl_comments.append(getTime());
-                                    Log.d("CHECKIG", jsonArray.length() + " COMMENTS");
-                                    endSaveForUrl_comments.append(getTime());
-                                }
-                                else{
-                                    Log.d("CHECKING","null");
-                                }
-                            }
-                        });
-            }
-        });*/
-
-        fetchPhotos = Observable.create(new Observable.OnSubscribe<JSONArray>() {
-            @Override
-            public void call(Subscriber<? super JSONArray> subscriber) {
-                try {
-                    JSONArray data = fetcchDataOkHttp(urls[1]);
-                    subscriber.onNext(data);
-                    subscriber.onCompleted();
-                }
-                catch (Exception e){
-                    subscriber.onError(e);
-                }
-            }
-        });
+        //Observable for photos
+        fetchPhotos = observervableFactory.getObservervable(JSONArray.class, 1);
 
         // observable  for todos
-        fetchTodos = Observable.create(new Observable.OnSubscribe<JSONArray>() {
-            @Override
-            public void call(Subscriber<? super JSONArray> subscriber) {
-                try{
-                    JSONArray jsonArray = fetcchDataOkHttp(urls[2]);
-                    subscriber.onNext(jsonArray);
-                    subscriber.onCompleted();
-                }
-                catch (Exception e){
-                    subscriber.onError(e);
-                }
-            }
-        });
+        fetchTodos = observervableFactory.getObservervable(JSONArray.class, 2);
 
         // Observabe for fetching the posts
-        fetchPosts = Observable.create(new Observable.OnSubscribe<JSONArray>() {
-            @Override
-            public void call(Subscriber<? super JSONArray> subscriber) {
-                try{
-                    JSONArray data = fetcchDataOkHttp(urls[3]);
-                    subscriber.onNext(data);
-                    subscriber.onCompleted();
-                }
-                catch (Exception e){
-                    subscriber.onError(e);
-                }
-            }
-        });
+        fetchPosts = observervableFactory.getObservervable(JSONArray.class, 3);
 
     }
 
