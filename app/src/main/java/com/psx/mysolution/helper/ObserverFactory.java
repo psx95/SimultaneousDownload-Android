@@ -24,7 +24,7 @@ public class ObserverFactory<T> {
         this.typeParameterClass = typeParameterClass;
     }
 
-    public Observer<T> getObserver(final TextView textView_for_end_time_display, final JSONArray jsonArray){
+    public Observer<T> getObserver(final TextView textView_for_end_time_display, final int pos, final TextView start_save, final TextView end_save){
         Observer<T> observer = new Observer<T>() {
             @Override
             public void onCompleted() {
@@ -32,7 +32,7 @@ public class ObserverFactory<T> {
                 textView_for_end_time_display.setText("End: "+mainActivity.getTime());
                 if (array!=null){
                     Log.d("OBSERVER_FACTORY",array.toString());
-                    mainActivity.getDBOperations().execute(array);
+                    mainActivity.getDBOperations().execute(new Object[]{array,pos,start_save,end_save});
                 }
             }
 
