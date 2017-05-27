@@ -119,8 +119,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         });
             }
         });*/
-
-        // Observable for fetching the photos
+        
         fetchPhotos = Observable.create(new Observable.OnSubscribe<JSONArray>() {
             @Override
             public void call(Subscriber<? super JSONArray> subscriber) {
