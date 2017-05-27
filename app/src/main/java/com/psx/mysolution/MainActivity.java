@@ -169,27 +169,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
-
-        // creating observable that fetches from both urls simultaneosly
-        // zip operator
-         /*zipped  = Observable.zip(fetchComments, fetchPosts, new Func2<JSONArray, JSONArray, JSONObject>() {
-            JSONObject jsonObject;
-            @Override
-            public JSONObject call(JSONArray jsonArray, JSONArray jsonArray2) {
-                Log.d("ZIPPED","length of comments "+jsonArray.length()+" "+getTime()+" length of posts "+jsonArray2.length()+" "+getTime());
-                try {
-                    jsonObject = new JSONObject();
-                    jsonObject.put("comments",jsonArray);
-                    jsonObject.put("posts",jsonArray2);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                return jsonObject;
-            }
-        });*/
-
-
-
+        
     }
 
     @Override
