@@ -208,10 +208,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return new Observer<JSONArray>() {
             @Override
             public void onCompleted() {
-                Log.d("OBSERVER TODOS","COMPLETED");
                 endTimeForUrl_todos.setText("End: "+getTime());
                 if (jsonArrayTodos != null){
-                    // start saving in the database
                     new PerformDBOperations().execute(jsonArrayTodos);
                 }
                 else {
