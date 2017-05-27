@@ -17,6 +17,7 @@ import com.psx.mysolution.Tables.Comments;
 import com.psx.mysolution.Tables.Photos;
 import com.psx.mysolution.Tables.Posts;
 import com.psx.mysolution.Tables.Todos;
+import com.psx.mysolution.helper.ObserverFactory;
 import com.psx.mysolution.helper.ObserverableFactory;
 import com.squareup.okhttp.OkHttpClient;
 
@@ -43,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public JSONArray jsonArrayComments, jsonArrayPhotos, jsonArrayTodos, jsonArrayPosts;
     public Button button_url_comments, button_url_photos, button_url_todos, button_url_posts, button_currentTimestamp;
     public Observable<JSONArray> fetchComments, fetchPhotos, fetchTodos, fetchPosts;
-    public Observable<JSONObject> zipped;
+    public ObserverFactory<JSONArray> observerFactory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         button_url_photos.setOnClickListener(this);
         button_url_todos.setOnClickListener(this);
         button_url_posts.setOnClickListener(this);
+
+        observerFactory = new ObserverFactory<>(JSONArray.class);
 
         // Observable for comments
         ObserverableFactory<JSONArray> observervableFactory = new ObserverableFactory<>(JSONArray.class);
@@ -118,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startTimeForUrl_comments.setText("Start: "+getTime());
         fetchComments.subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(getObserverForComments());
+                .subscribe(observerFactory.getObserver(endTimeForUrl_comments,jsonArrayComments));
     }
 
     public void subscribToPhotos (){
@@ -143,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     // make separate Observers for the observables
+
     private Observer<JSONArray> getObserverForComments (){
         return new Observer<JSONArray>() {
             @Override
@@ -329,7 +333,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    class PerformDBOperations extends AsyncTask<JSONArray, Void, Void>{
+    public PerformDBOperations getDBOperations(){
+        return new PerformDBOperations();
+    }
+
+    public class PerformDBOperations extends AsyncTask<JSONArray, Void, Void>{
 
         JSONArray jsonArray;
         String startTime;
