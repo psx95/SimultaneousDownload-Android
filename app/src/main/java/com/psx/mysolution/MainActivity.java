@@ -17,6 +17,7 @@ import com.psx.mysolution.Tables.Comments;
 import com.psx.mysolution.Tables.Photos;
 import com.psx.mysolution.Tables.Posts;
 import com.psx.mysolution.Tables.Todos;
+import com.psx.mysolution.helper.ObserverFactory;
 import com.squareup.okhttp.OkHttpClient;
 
 import org.json.JSONArray;
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         button_url_posts.setOnClickListener(this);
 
         // Observable for comments
-        fetchComments = Observable.create(new Observable.OnSubscribe<JSONArray>() {
+        /*fetchComments = Observable.create(new Observable.OnSubscribe<JSONArray>() {
             @Override
             public void call(Subscriber<? super JSONArray> subscriber) {
                 try {
@@ -95,7 +96,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     subscriber.onError(e);
                 }
             }
-        });
+        });*/
+
+        ObserverFactory<JSONArray> observerFactory = new ObserverFactory<JSONArray>(JSONArray.class);
+        fetchComments = observerFactory.getObserver(JSONArray.class,0);
+
         /*observableClick.observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<OnClickEvent>() {
             @Override
@@ -119,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         });
             }
         });*/
-        
+
         fetchPhotos = Observable.create(new Observable.OnSubscribe<JSONArray>() {
             @Override
             public void call(Subscriber<? super JSONArray> subscriber) {
