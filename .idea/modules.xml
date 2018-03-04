@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MySolution.iml" filepath="$PROJECT_DIR$/MySolution.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://G:\Android Projects\SimultaneousDownload-Android\MySolution.iml" filepath="G:\Android Projects\SimultaneousDownload-Android\MySolution.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SimultaneousDownload-Android.iml" filepath="$PROJECT_DIR$/SimultaneousDownload-Android.iml" />
+      <module fileurl="file://G:\Android Projects\SimultaneousDownload-Android\app\app.iml" filepath="G:\Android Projects\SimultaneousDownload-Android\app\app.iml" />
     </modules>
   </component>
 </project>
