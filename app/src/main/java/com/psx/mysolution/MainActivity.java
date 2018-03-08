@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public TextView endTimeForUrl_comments, endTimeForUrl_photos,endTimeForUrl_todos, endTimeForUrl_posts;
     public TextView startSaveForUrl_comments, startSaveForUrl_photos, startSaveForUrl_todos, startSaveForUrl_posts;
     public TextView endSaveForUrl_comments, endSaveForUrl_photos, endSaveForUrl_todos, endSaveForUrl_posts;
+    public TextView currentTimestamp;
     public String urls [] = {"https://jsonplaceholder.typicode.com/comments","https://jsonplaceholder.typicode.com/photos","https://jsonplaceholder.typicode.com/todos","https://jsonplaceholder.typicode.com/posts"};
     public JSONArray jsonArrayComments, jsonArrayPhotos, jsonArrayTodos, jsonArrayPosts;
     public Button button_url_comments, button_url_photos, button_url_todos, button_url_posts, button_currentTimestamp;
@@ -55,6 +56,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        Log.e(TAG, "onCreate: ");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -78,6 +82,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         endSaveForUrl_photos = (TextView) findViewById(R.id.endSavePhotos);
         endSaveForUrl_todos = (TextView) findViewById(R.id.endSaveTodos);
         endSaveForUrl_posts = (TextView) findViewById(R.id.endSavePosts);
+
+        currentTimestamp = (TextView) findViewById(R.id.tv_current_timestamp);
         context = this;
         // finding all the buttons in the layout
         button_url_comments = (Button) findViewById(R.id.button_url_comments);
@@ -145,7 +151,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Observable<Object> observable = Observable
                 .create((subscriber) -> {
                     try{
+                        int pos = (Integer) objects[1];
                         String obj = saveToDB(objects);
+                        Log.e(TAG, "saveData: " + pos + " " + obj );
                         subscriber.onNext(obj);
                         subscriber.onCompleted();
                     }catch (Exception e){
@@ -170,7 +178,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .doOnNext((s) -> textViews.get(1).setText("End: "+ getTime()))
                 .doOnNext((s) -> textViews.get(2).setText("Start Save: "+ getTime()))
                 .flatMap(data -> saveData(data, indexOfUrl))
-                .doOnNext((s) -> textViews.get(3).setText("End Save: "+ s));
+                .doOnNext((s) -> textViews.get(3).setText("End Save: "+ s))
+                .doOnNext((s) -> currentTimestamp.setText(getTime()));
 
         return observable;
     }
@@ -216,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .subscribe();
                 break;
             case R.id.button_current_timestamp:
-                Toast.makeText(context,"Current Timestamp is "+getTime(),Toast.LENGTH_LONG).show();
+                currentTimestamp.setText(getTime());
                 break;
         }
     }
@@ -317,6 +326,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             default:
                 Log.d("SAVE_DB","Invalid input");
         }
+        Log.e(TAG, "saveToDB: saved" + pos + " " + endSaveTime );
         return endSaveTime;
     }
 }
