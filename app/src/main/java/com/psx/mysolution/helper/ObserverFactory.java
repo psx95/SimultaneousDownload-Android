@@ -32,7 +32,6 @@ public class ObserverFactory<T> {
                 textView_for_end_time_display.setText("End: "+mainActivity.getTime());
                 if (array!=null){
                     Log.d("OBSERVER_FACTORY",array.toString());
-                    mainActivity.getDBOperations().execute(new Object[]{array,pos,start_save,end_save});
                 }
             }
 

@@ -28,24 +28,21 @@ public class ObserverableFactory<T> {
     }
 
     public Observable<T> getObservervable (Type t, final int url_index){
-        Observable<T> observervable = Observable.create(new Observable.OnSubscribe<T>() {
-            @Override
-            public void call(Subscriber<? super T> subscriber) {
+        Observable<T> observervable = Observable.create((subscriber) -> {
                 try {
-                    T data = fetcchDataOkHttp(mainActivity.urls[url_index], typeParameterClass);
+                    T data = fetchDataOkHttp(mainActivity.urls[url_index], typeParameterClass);
                     subscriber.onNext(data);
                     subscriber.onCompleted();
                 }
                 catch (Exception e){
                     subscriber.onError(e);
                 }
-            }
         });
         return observervable;
     }
 
 
-    public  <T> T fetcchDataOkHttp (String url, Class<T> cls){
+    public  <T> T fetchDataOkHttp (String url, Class<T> cls){
         try{
             OkHttpClient client = new OkHttpClient();
             com.squareup.okhttp.Request request = new com.squareup.okhttp.Request.Builder().url(url).build();
